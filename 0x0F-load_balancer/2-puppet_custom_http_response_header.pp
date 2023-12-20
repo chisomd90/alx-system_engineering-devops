@@ -17,8 +17,6 @@ file { '/etc/nginx/nginx.conf':
 
 # Restart Nginx to apply changes
 service { 'nginx':
-  ensure    => running,
-  enable    => true,
-  subscribe => File['/etc/nginx/nginx.conf'],
+  ensure  => running,
+  require => Package['nginx'],
 }
-
