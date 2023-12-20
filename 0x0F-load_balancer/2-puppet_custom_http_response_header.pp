@@ -1,22 +1,25 @@
-# 2-puppet_custom_http_response_header.pp
+# Installs a Nginx server with custom HTTP header
 
-# Install Nginx package
-package { 'nginx':
-  ensure => installed,
+exec {'update':
+  provider => shell,
+  command  => 'sudo apt-get -y update',
+  before   => Exec['install Nginx'],
 }
 
-# Define custom header value
-$custom_header_value = $::hostname
-
-# Configure Nginx with custom header
-file { '/etc/nginx/nginx.conf':
-  ensure  => file,
-  content => "http {\n  add_header X-Served-By $custom_header_value;\n}\n",
-  notify  => Service['nginx'],
+exec {'install Nginx':
+  provider => shell,
+  command  => 'sudo apt-get -y install nginx',
+  before   => Exec['add_header'],
 }
 
-# Restart Nginx to apply changes
-service { 'nginx':
-  ensure  => running,
-  require => Package['nginx'],
+exec { 'add_header':
+  provider    => shell,
+  environment => ["HOST=${hostname}"],
+  command     => 'sudo sed -i "s/include \/etc\/nginx\/sites-enabled\/\*;/include \/etc\/nginx\/sites-enabled\/\*;\n\tadd_header X-Served-By \"$HOST\";/" /etc/nginx/nginx.conf',
+  before      => Exec['restart Nginx'],
+}
+
+exec { 'restart Nginx':
+  provider => shell,
+  command  => 'sudo service nginx restart',
 }
