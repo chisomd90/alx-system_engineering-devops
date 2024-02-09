@@ -2,3 +2,5 @@
 # Gracefully reloads Gunicorn
 
 pgrep gunicorn | xargs kill -HUP
+
+echo "Gunicorn workers are being gracefully restarted."
